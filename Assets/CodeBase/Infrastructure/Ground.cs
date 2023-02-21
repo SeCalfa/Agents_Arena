@@ -6,20 +6,28 @@ using UnityEngine;
 
 namespace CodeBase.Infrastructure
 {
+    [RequireComponent(typeof(AgentSpawner))]
     public class Ground : MonoBehaviour
     {
         [Range(2, 15)]
         [SerializeField] private int planeSize;
 
+        private AgentSpawner agentSpawner;
+        private List<Plane> planes = new List<Plane>();
+
         private void Awake()
         {
+            agentSpawner = GetComponent<AgentSpawner>();
+
             GroundClear();
             GroundGenerate();
+            agentSpawner.Construct(planes);
+            agentSpawner.SpawnOnStart();
         }
 
         private void GroundGenerate()
         {
-            GameObject plane = (GameObject)Resources.Load(Constance.Plane);
+            GameObject plane = Resources.Load(Constance.Plane) as GameObject;
 
             float pointX = planeSize - 0.5f;
             float pointZ = planeSize - 0.5f;
@@ -29,30 +37,64 @@ namespace CodeBase.Infrastructure
             {
                 for (int z = 0; z < planeSize * 2; z++)
                 {
-                    GameObject currentPlane = Instantiate(plane, new Vector3(pointX, 0, pointZ), Quaternion.identity, transform);
+                    Plane currentPlane = Instantiate(plane, new Vector3(pointX, 0, pointZ), Quaternion.identity, transform).GetComponent<Plane>();
 
                     if (rowCount % 2 == 0)
                     {
                         if ((z + 1) % 2 == 0)
-                            currentPlane.GetComponent<Plane>().SetGrey();
+                            currentPlane.SetGrey();
                         else
-                            currentPlane.GetComponent<Plane>().SetWhite();
+                            currentPlane.SetWhite();
                     }
                     else
                     {
                         if ((z + 1) % 2 == 0)
-                            currentPlane.GetComponent<Plane>().SetWhite();
+                            currentPlane.SetWhite();
                         else
-                            currentPlane.GetComponent<Plane>().SetGrey();
+                            currentPlane.SetGrey();
                     }
 
                     pointZ -= 1f;
+                    planes.Add(currentPlane);
+                    BordersOn(x, z, currentPlane);
                 }
 
                 pointX -= 1f;
                 pointZ = planeSize - 0.5f;
                 rowCount++;
             }
+        }
+
+        private void BordersOn(int x, int z, Plane currentPlane)
+        {
+            if (x == 0 && z == 0)
+            {
+                currentPlane.ForwardWallOn();
+                currentPlane.RightWallOn();
+            }
+            else if (x == 0 && z == planeSize * 2 - 1)
+            {
+                currentPlane.BackWallOn();
+                currentPlane.RightWallOn();
+            }
+            else if (x == planeSize * 2 - 1 && z == 0)
+            {
+                currentPlane.ForwardWallOn();
+                currentPlane.LeftWallOn();
+            }
+            else if (x == planeSize * 2 - 1 && z == planeSize * 2 - 1)
+            {
+                currentPlane.BackWallOn();
+                currentPlane.LeftWallOn();
+            }
+            else if (x == 0)
+                currentPlane.RightWallOn();
+            else if (x == planeSize * 2 - 1)
+                currentPlane.LeftWallOn();
+            else if (z == 0)
+                currentPlane.ForwardWallOn();
+            else if (z == planeSize * 2 - 1)
+                currentPlane.BackWallOn();
         }
 
         private void GroundClear()
