@@ -1,47 +1,69 @@
-﻿using UnityEngine;
+﻿using CodeBase.Agent.Logic;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace CodeBase.Agent
 {
     public class AgentMove : MonoBehaviour
     {
-        public CharacterController CharacterController;
+        public Rigidbody rb;
         public Aggro aggro;
 
         public float AgentSpeed { get; set; } = 1;
 
+        private Vector3 direction;
+        private List<DirectionData> moveDirection = new List<DirectionData>();
+
         private void Awake()
         {
-            aggro.OnAgentCollisionEnter += ChangeDirection;
-            aggro.OnWallCollisionEnter += ChangeDirection;
+            aggro.OnAgentCollisionEnter += ScanSpace;
+            aggro.OnWallCollisionEnter += ScanSpace;
 
-            SetRandomRotation();
+            ScanSpace();
         }
 
         private void OnDisable()
         {
-            aggro.OnAgentCollisionEnter -= ChangeDirection;
-            aggro.OnWallCollisionEnter -= ChangeDirection;
+            aggro.OnAgentCollisionEnter -= ScanSpace;
+            aggro.OnWallCollisionEnter -= ScanSpace;
         }
 
         private void Update()
         {
             Movement();
-            if (CharacterController.velocity.magnitude <= 0.01f)
-                ChangeDirection();
         }
 
-        private void Movement()
+        public void ScanSpace()
         {
-            Vector3 movementVector = transform.forward;
-            movementVector.y = 0;
-            movementVector.Normalize();
-            CharacterController.Move(movementVector * AgentSpeed * Time.deltaTime);
+            moveDirection.Clear();
+
+            RaycastHit hit;
+
+            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, Mathf.Infinity))
+                moveDirection.Add(new DirectionData(Vector3.forward, Vector3.Distance(transform.position, hit.point)));
+            if (Physics.Raycast(transform.position, transform.TransformDirection(-Vector3.forward), out hit, Mathf.Infinity))
+                moveDirection.Add(new DirectionData(-Vector3.forward, Vector3.Distance(transform.position, hit.point)));
+            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.right), out hit, Mathf.Infinity))
+                moveDirection.Add(new DirectionData(Vector3.right, Vector3.Distance(transform.position, hit.point)));
+            if (Physics.Raycast(transform.position, transform.TransformDirection(-Vector3.right), out hit, Mathf.Infinity))
+                moveDirection.Add(new DirectionData(-Vector3.right, Vector3.Distance(transform.position, hit.point)));
+
+            float dis = moveDirection.First().Distance;
+            foreach (DirectionData item in moveDirection)
+            {
+                if(item.Distance < dis)
+                    dis = item.Distance;
+            }
+            List<DirectionData> directions = moveDirection.Where(d => d.Distance > 0.5f).ToList();
+
+            direction = directions[Random.Range(0, directions.Count)].Direction;
+            direction.Normalize();
+            direction.y = 0;
         }
 
-        private void SetRandomRotation() =>
-            transform.rotation = Quaternion.Euler(new Vector3(0, Random.Range(0, 360), 0));
-
-        private void ChangeDirection() =>
-            transform.rotation = Quaternion.Euler(new Vector3(0, transform.eulerAngles.y + 120, 0));
+        private void Movement() =>
+            GetComponent<Rigidbody>().MovePosition(transform.position + direction * Time.deltaTime);
     }
 }

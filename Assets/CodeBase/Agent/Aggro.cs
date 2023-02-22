@@ -5,7 +5,6 @@ namespace CodeBase.Agent
 {
     public class Aggro : MonoBehaviour
     {
-
         public event Action OnAgentCollisionEnter;
         public event Action OnWallCollisionEnter;
 

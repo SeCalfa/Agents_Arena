@@ -8,7 +8,7 @@ namespace CodeBase.Infrastructure
     public class AgentSpawner : MonoBehaviour
     {
         [Header("Spawn generetor settings")]
-        [Range(3, 5)]
+        [Range(3, 30)]
         [SerializeField] private int agentsOnStart;
         [Range(2f, 6f)]
         [SerializeField] private float spawnRate;
