@@ -9,7 +9,7 @@ namespace CodeBase.Infrastructure
     [RequireComponent(typeof(AgentSpawner))]
     public class Ground : MonoBehaviour
     {
-        [Range(2, 15)]
+        [Range(4, 10)]
         [SerializeField] private int planeSize;
 
         private AgentSpawner agentSpawner;

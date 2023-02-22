@@ -14,7 +14,7 @@ namespace CodeBase.Infrastructure
         [SerializeField] private float spawnRate;
 
         [Header("Agent settings")]
-        [Range(0.5f, 5)]
+        [Range(0.5f, 2)]
         [SerializeField] private float agentSpeed;
 
         private List<Plane> planes;

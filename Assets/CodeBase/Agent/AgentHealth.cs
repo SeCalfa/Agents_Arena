@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 namespace CodeBase.Agent
 {
     public class AgentHealth : MonoBehaviour
     {
         public Transform canvas;
-        public Text text;
+        public TextMeshProUGUI text;
 
         private int health = 3;
 
@@ -30,6 +30,14 @@ namespace CodeBase.Agent
         {
             health -= 1;
             text.text = health.ToString();
+
+            if (health == 2)
+                text.color = Color.yellow;
+            else if (health == 1)
+                text.color = Color.red;
+
+            if (health == 0)
+                Destroy(gameObject);
         }
     }
 }

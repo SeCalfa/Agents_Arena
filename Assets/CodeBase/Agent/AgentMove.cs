@@ -38,17 +38,18 @@ namespace CodeBase.Agent
         public void SetDirectionOnStart()
         {
             direction = startDirections[Random.Range(0, startDirections.Count)];
-            direction.Normalize();
             direction.y = 0;
+            direction.Normalize();
         }
 
         public void OppositeDirection(Transform target)
         {
-            direction = (transform.position - target.position).normalized;
+            direction = transform.position - target.position;
             direction.y = 0;
+            direction.Normalize();
         }
 
         private void Movement() =>
-            GetComponent<Rigidbody>().MovePosition(transform.position + direction * Time.deltaTime);
+            GetComponent<Rigidbody>().MovePosition(transform.position + direction * AgentSpeed * Time.deltaTime);
     }
 }
