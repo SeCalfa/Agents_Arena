@@ -15,6 +15,11 @@ namespace CodeBase.Agent
             GetComponent<Aggro>().OnAgentCollisionEnter += TakeDamage;
         }
 
+        private void OnDisable()
+        {
+            GetComponent<Aggro>().OnAgentCollisionEnter -= TakeDamage;
+        }
+
         private void Update()
         {
             Quaternion rotation = Camera.main.transform.rotation;

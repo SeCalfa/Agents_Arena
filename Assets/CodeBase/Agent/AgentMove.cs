@@ -1,7 +1,4 @@
-﻿using CodeBase.Agent.Logic;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace CodeBase.Agent
@@ -14,20 +11,23 @@ namespace CodeBase.Agent
         public float AgentSpeed { get; set; } = 1;
 
         private Vector3 direction;
-        private List<DirectionData> moveDirection = new List<DirectionData>();
+        private List<Vector3> startDirections = new List<Vector3>()
+            {
+                Vector3.forward, -Vector3.forward, Vector3.right, -Vector3.right
+            };
 
         private void Awake()
         {
-            aggro.OnAgentCollisionEnter += ScanSpace;
-            aggro.OnWallCollisionEnter += ScanSpace;
+            aggro.OnAgentCollisionEnterParam += OppositeDirection;
+            aggro.OnWallCollisionEnterParam += OppositeDirection;
 
-            ScanSpace();
+            SetDirectionOnStart();
         }
 
         private void OnDisable()
         {
-            aggro.OnAgentCollisionEnter -= ScanSpace;
-            aggro.OnWallCollisionEnter -= ScanSpace;
+            aggro.OnAgentCollisionEnterParam -= OppositeDirection;
+            aggro.OnWallCollisionEnterParam -= OppositeDirection;
         }
 
         private void Update()
@@ -35,31 +35,16 @@ namespace CodeBase.Agent
             Movement();
         }
 
-        public void ScanSpace()
+        public void SetDirectionOnStart()
         {
-            moveDirection.Clear();
-
-            RaycastHit hit;
-
-            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, Mathf.Infinity))
-                moveDirection.Add(new DirectionData(Vector3.forward, Vector3.Distance(transform.position, hit.point)));
-            if (Physics.Raycast(transform.position, transform.TransformDirection(-Vector3.forward), out hit, Mathf.Infinity))
-                moveDirection.Add(new DirectionData(-Vector3.forward, Vector3.Distance(transform.position, hit.point)));
-            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.right), out hit, Mathf.Infinity))
-                moveDirection.Add(new DirectionData(Vector3.right, Vector3.Distance(transform.position, hit.point)));
-            if (Physics.Raycast(transform.position, transform.TransformDirection(-Vector3.right), out hit, Mathf.Infinity))
-                moveDirection.Add(new DirectionData(-Vector3.right, Vector3.Distance(transform.position, hit.point)));
-
-            float dis = moveDirection.First().Distance;
-            foreach (DirectionData item in moveDirection)
-            {
-                if(item.Distance < dis)
-                    dis = item.Distance;
-            }
-            List<DirectionData> directions = moveDirection.Where(d => d.Distance > 0.5f).ToList();
-
-            direction = directions[Random.Range(0, directions.Count)].Direction;
+            direction = startDirections[Random.Range(0, startDirections.Count)];
             direction.Normalize();
+            direction.y = 0;
+        }
+
+        public void OppositeDirection(Transform target)
+        {
+            direction = (transform.position - target.position).normalized;
             direction.y = 0;
         }
 
