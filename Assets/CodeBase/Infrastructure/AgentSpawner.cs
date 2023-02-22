@@ -19,6 +19,7 @@ namespace CodeBase.Infrastructure
 
         private List<Plane> planes;
         private List<int> filledPlaneOnStart = new List<int>();
+        private List<GameObject> allAgents = new List<GameObject>();
         private GameObject agent;
 
         public void Construct(List<Plane> planes)
@@ -26,6 +27,11 @@ namespace CodeBase.Infrastructure
             this.planes = planes;
 
             agent = Resources.Load(Constance.Agent) as GameObject;
+        }
+
+        private void Start()
+        {
+            StartCoroutine(SpawnByRate());
         }
 
         public void SpawnOnStart()
@@ -38,10 +44,40 @@ namespace CodeBase.Infrastructure
                     rand = Random.Range(0, planes.Count);
                 }
                 filledPlaneOnStart.Add(rand);
-
-                GameObject currentAgent = Instantiate(agent, planes[rand].GetSpawnPoint.position, Quaternion.identity, transform);
-                currentAgent.GetComponent<AgentMove>().AgentSpeed = agentSpeed;
+                SpawnAgent(rand);
             }
+        }
+
+        public void DestroyAgent(GameObject agent)
+        {
+            if (allAgents.Contains(agent))
+            {
+                allAgents.Remove(agent);
+                Destroy(agent);
+            }
+        }
+
+        private IEnumerator SpawnByRate()
+        {
+            while (true)
+            {
+                yield return new WaitForSeconds(spawnRate);
+
+                if(allAgents.Count < Constance.MaxAgents)
+                {
+                    int rand = Random.Range(0, planes.Count);
+                    SpawnAgent(rand);
+                }
+            }
+        }
+
+        private void SpawnAgent(int rand)
+        {
+            GameObject currentAgent = Instantiate(agent, planes[rand].GetSpawnPoint.position, Quaternion.identity, transform);
+            currentAgent.GetComponent<AgentMove>().AgentSpeed = agentSpeed;
+            currentAgent.GetComponent<AgentHealth>().Construct(this);
+
+            allAgents.Add(currentAgent);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using TMPro;
+using CodeBase.Infrastructure;
 
 namespace CodeBase.Agent
 {
@@ -8,7 +9,14 @@ namespace CodeBase.Agent
         public Transform canvas;
         public TextMeshProUGUI text;
 
+        private AgentSpawner agentSpawner;
+
         private int health = 3;
+
+        public void Construct(AgentSpawner agentSpawner)
+        {
+            this.agentSpawner = agentSpawner;
+        }
 
         private void Awake()
         {
@@ -37,7 +45,7 @@ namespace CodeBase.Agent
                 text.color = Color.red;
 
             if (health == 0)
-                Destroy(gameObject);
+                agentSpawner.DestroyAgent(gameObject);
         }
     }
 }

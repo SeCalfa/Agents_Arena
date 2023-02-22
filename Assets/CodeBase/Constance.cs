@@ -10,5 +10,7 @@
 
         public const string WallTag = "Wall";
         public const string AgentTag = "Agent";
+
+        public const int MaxAgents = 30;
     }
 }
