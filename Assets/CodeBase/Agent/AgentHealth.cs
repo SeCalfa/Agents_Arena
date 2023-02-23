@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using TMPro;
 using CodeBase.Infrastructure;
+using System;
 
 namespace CodeBase.Agent
 {
@@ -8,6 +9,9 @@ namespace CodeBase.Agent
     {
         public Transform canvas;
         public TextMeshProUGUI text;
+
+        public event Action<int> OnTakeDamage;
+        public event Action OnDeath;
 
         private AgentSpawner agentSpawner;
 
@@ -44,8 +48,13 @@ namespace CodeBase.Agent
             else if (health == 1)
                 text.color = Color.red;
 
+            OnTakeDamage?.Invoke(health);
+
             if (health == 0)
+            {
+                OnDeath?.Invoke();
                 agentSpawner.DestroyAgent(gameObject);
+            }
         }
     }
 }

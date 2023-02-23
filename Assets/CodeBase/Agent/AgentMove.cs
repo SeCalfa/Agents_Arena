@@ -11,23 +11,23 @@ namespace CodeBase.Agent
         public float AgentSpeed { get; set; } = 1;
 
         private Vector3 direction;
-        private List<Vector3> startDirections = new List<Vector3>()
+        private List<Vector3> targetPoints = new List<Vector3>()
             {
-                Vector3.forward, -Vector3.forward, Vector3.right, -Vector3.right
+                Vector3.one, -Vector3.one, Vector3.zero
             };
 
         private void Awake()
         {
             aggro.OnAgentCollisionEnterParam += OppositeDirection;
-            aggro.OnWallCollisionEnterParam += OppositeDirection;
+            aggro.OnWallCollisionEnter += SetNewDirection;
 
-            SetDirectionOnStart();
+            SetNewDirection();
         }
 
         private void OnDisable()
         {
             aggro.OnAgentCollisionEnterParam -= OppositeDirection;
-            aggro.OnWallCollisionEnterParam -= OppositeDirection;
+            aggro.OnWallCollisionEnter -= SetNewDirection;
         }
 
         private void Update()
@@ -35,16 +35,16 @@ namespace CodeBase.Agent
             Movement();
         }
 
-        public void SetDirectionOnStart()
+        private void OppositeDirection(Transform target)
         {
-            direction = startDirections[Random.Range(0, startDirections.Count)];
+            direction = transform.position - target.position;
             direction.y = 0;
             direction.Normalize();
         }
 
-        public void OppositeDirection(Transform target)
+        private void SetNewDirection()
         {
-            direction = transform.position - target.position;
+            direction = targetPoints[Random.Range(0, targetPoints.Count)] - transform.position;
             direction.y = 0;
             direction.Normalize();
         }

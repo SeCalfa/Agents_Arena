@@ -5,9 +5,9 @@ namespace CodeBase.Agent
 {
     public class Aggro : MonoBehaviour
     {
+        public event Action OnWallCollisionEnter;
         public event Action OnAgentCollisionEnter;
         public event Action<Transform> OnAgentCollisionEnterParam;
-        public event Action<Transform> OnWallCollisionEnterParam;
 
         private void OnCollisionEnter(Collision collision)
         {
@@ -18,7 +18,7 @@ namespace CodeBase.Agent
             }
             else if (collision.gameObject.CompareTag(Constance.WallTag))
             {
-                OnWallCollisionEnterParam?.Invoke(collision.transform);
+                OnWallCollisionEnter?.Invoke();
             }
         }
     }
